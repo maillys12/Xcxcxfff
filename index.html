@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="theme-color" content="#fbfaf8">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8f7f4;
+      --surface: rgba(255,255,255,.92);
+      --ink: #252321;
+      --muted: #77716b;
+      --line: #e9e4de;
+      --accent: #1f1d1b;
+      --soft: #f1ede8;
+      --danger: #d94a4a;
+      --shadow: 0 12px 36px rgba(45, 38, 31, .08);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% -5%, #fff 0, transparent 36%),
+        radial-gradient(circle at 100% 20%, #eee7df 0, transparent 28%),
+        var(--bg);
+      font-family: "Prompt", sans-serif;
+    }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    .shell { width: min(100% - 28px, 720px); margin: 0 auto; padding: 32px 0 116px; }
+    .hero { text-align: center; padding: 22px 8px 24px; }
+    .brand-mark {
+      width: 76px; height: 76px; margin: 0 auto 14px; display: grid; place-items: center;
+      border-radius: 25px; color: #fff; font-size: 29px; font-weight: 700; letter-spacing: -2px;
+      background: linear-gradient(145deg, #171615, #4e4944); box-shadow: 0 12px 30px rgba(31,29,27,.22);
+    }
+    h1 { margin: 0; font-size: clamp(27px, 8vw, 36px); letter-spacing: -.8px; }
+    .tagline { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
+    .notice {
+      display: flex; gap: 10px; align-items: flex-start; margin: 8px 0 18px; padding: 14px 16px;
+      background: #fff8e8; border: 1px solid #f1dfb4; border-radius: 18px; color: #715a28; font-size: 13px;
+    }
+    .notice b { white-space: nowrap; }
+    .search-wrap { position: sticky; top: 10px; z-index: 5; margin-bottom: 20px; }
+    .search {
+      width: 100%; height: 54px; border: 1px solid rgba(224,219,213,.9); border-radius: 18px;
+      padding: 0 48px 0 46px; background: rgba(255,255,255,.88); color: var(--ink);
+      outline: none; box-shadow: 0 10px 28px rgba(52,44,37,.07); backdrop-filter: blur(16px);
+    }
+    .search:focus { border-color: #aaa29a; box-shadow: 0 0 0 4px rgba(80,72,65,.08), var(--shadow); }
+    .search-icon { position: absolute; left: 17px; top: 16px; width: 22px; height: 22px; color: #8d867f; pointer-events: none; }
+    .clear {
+      display: none; position: absolute; right: 12px; top: 10px; width: 34px; height: 34px; border: 0;
+      border-radius: 50%; background: var(--soft); cursor: pointer;
+    }
+    .section-head { display: flex; justify-content: space-between; align-items: baseline; margin: 0 2px 12px; }
+    .section-head h2 { margin: 0; font-size: 17px; }
+    .count { color: var(--muted); font-size: 12px; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+    .app-card {
+      position: relative; min-height: 108px; display: flex; align-items: center; gap: 13px; padding: 16px;
+      border: 1px solid var(--line); border-radius: 21px; background: var(--surface); text-align: left;
+      cursor: pointer; box-shadow: 0 7px 22px rgba(45,38,31,.045); transition: transform .18s, box-shadow .18s, border-color .18s;
+    }
+    .app-card:hover { transform: translateY(-2px); border-color: #d3ccc5; box-shadow: var(--shadow); }
+    .app-card:active { transform: scale(.985); }
+    .app-icon {
+      flex: 0 0 49px; width: 49px; height: 49px; display: grid; place-items: center; border-radius: 15px;
+      color: #fff; font-weight: 700; font-size: 18px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.18);
+    }
+    .app-copy { min-width: 0; }
+    .app-name { display: block; font-size: 14px; font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; }
+    .app-hint { display: block; color: var(--muted); font-size: 11px; margin-top: 4px; }
+    .empty { display: none; padding: 35px 15px; text-align: center; color: var(--muted); }
+    .line-fab {
+      position: fixed; z-index: 8; right: max(18px, calc((100vw - 720px)/2 + 18px)); bottom: calc(18px + env(safe-area-inset-bottom));
+      display: flex; align-items: center; gap: 9px; min-height: 52px; padding: 0 18px; border-radius: 18px;
+      color: #fff; background: #06c755; text-decoration: none; font-weight: 600; font-size: 14px;
+      box-shadow: 0 14px 30px rgba(6,199,85,.28);
+    }
+    .line-dot { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; background: #fff; color: #06c755; font-size: 11px; font-weight: 700; }
+    .modal { position: fixed; inset: 0; z-index: 20; display: none; align-items: flex-end; justify-content: center; background: rgba(28,25,23,.5); backdrop-filter: blur(5px); }
+    .modal.open { display: flex; animation: fade .18s ease-out; }
+    .sheet {
+      width: min(100%, 720px); max-height: 90vh; overflow: auto; padding: 11px 20px calc(28px + env(safe-area-inset-bottom));
+      border-radius: 28px 28px 0 0; background: #fcfbf9; box-shadow: 0 -18px 60px rgba(0,0,0,.18); animation: rise .25s ease-out;
+    }
+    .grab { width: 42px; height: 5px; margin: 0 auto 17px; border-radius: 9px; background: #d8d2cc; }
+    .modal-head { display: flex; align-items: center; gap: 13px; margin-bottom: 18px; }
+    .modal-head .app-icon { width: 54px; height: 54px; flex-basis: 54px; }
+    .modal-title { flex: 1; min-width: 0; }
+    .modal-title h2 { margin: 0; font-size: 20px; }
+    .modal-title p { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+    .close { width: 39px; height: 39px; border: 0; border-radius: 50%; background: var(--soft); font-size: 21px; cursor: pointer; }
+    .rule-block { margin: 11px 0; padding: 16px; border: 1px solid var(--line); border-radius: 18px; background: #fff; }
+    .rule-block h3 { margin: 0 0 10px; font-size: 14px; }
+    .rule-block ul { margin: 0; padding-left: 21px; color: #5f5954; font-size: 13px; line-height: 1.8; }
+    .rule-block.warning { border-color: #f0d2d2; background: #fff8f8; }
+    .rule-block.warning h3 { color: var(--danger); }
+    .accept-note { margin: 15px 3px 0; color: var(--muted); font-size: 11px; text-align: center; }
+    .modal-actions { display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px; margin-top: 17px; }
+    .btn { min-height: 49px; display: grid; place-items: center; border: 0; border-radius: 16px; cursor: pointer; text-decoration: none; font-weight: 600; font-size: 13px; }
+    .btn-ghost { background: var(--soft); }
+    .btn-line { color: #fff; background: #06c755; }
+    @keyframes fade { from { opacity: 0; } }
+    @keyframes rise { from { transform: translateY(24px); opacity: .6; } }
+    @media (max-width: 390px) {
+      .shell { width: min(100% - 22px, 720px); }
+      .grid { gap: 9px; }
+      .app-card { min-height: 101px; padding: 13px 11px; gap: 10px; }
+      .app-icon { width: 43px; height: 43px; flex-basis: 43px; border-radius: 13px; font-size: 15px; }
+      .app-name { font-size: 12.5px; }
+    }
+    @media (min-width: 620px) { .grid { grid-template-columns: repeat(3, minmax(0,1fr)); } .modal { align-items: center; padding: 24px; } .sheet { border-radius: 28px; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <div class="brand-mark" aria-hidden="true">M</div>
+      <h1>MONTYSTORE</h1>
+      <p class="tagline">เงื่อนไขและกฎการใช้งานแอพพรีเมี่ยม</p>
+    </header>
+
+    <div class="notice"><b>โปรดอ่านก่อนใช้งาน</b><span>การสั่งซื้อและเข้าใช้งานสินค้า ถือว่าลูกค้ายอมรับเงื่อนไขของร้านแล้ว</span></div>
+
+    <div class="search-wrap">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+      <input id="search" class="search" type="search" placeholder="ค้นหาชื่อแอพ..." autocomplete="off" aria-label="ค้นหาชื่อแอพ">
+      <button id="clear" class="clear" aria-label="ล้างคำค้นหา">×</button>
+    </div>
+
+    <div class="section-head"><h2>เลือกแอพที่ต้องการดู</h2><span id="count" class="count"></span></div>
+    <section id="grid" class="grid" aria-live="polite"></section>
+    <div id="empty" class="empty">ไม่พบแอพที่ค้นหา</div>
+  </main>
+
+  <a class="line-fab" href="https://line.me/R/ti/p/%40418xiejk" target="_blank" rel="noopener"><span class="line-dot">LINE</span><span>ติดต่อ @418xiejk</span></a>
+
+  <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalName">
+    <article class="sheet">
+      <div class="grab"></div>
+      <div class="modal-head">
+        <div id="modalIcon" class="app-icon"></div>
+        <div class="modal-title"><h2 id="modalName"></h2><p>กฎและเงื่อนไขการใช้งาน</p></div>
+        <button id="close" class="close" aria-label="ปิด">×</button>
+      </div>
+      <section class="rule-block"><h3>เงื่อนไขการใช้งาน</h3><ul id="usageRules"></ul></section>
+      <section class="rule-block warning"><h3>ข้อห้าม</h3><ul id="prohibitedRules"></ul></section>
+      <section class="rule-block"><h3>การรับประกันและแจ้งปัญหา</h3><ul id="warrantyRules"></ul></section>
+      <p class="accept-note">ข้อความในหน้านี้เป็นตัวอย่าง โปรดแก้ให้ตรงกับเงื่อนไขจริงของร้านก่อนเผยแพร่</p>
+      <div class="modal-actions"><button id="back" class="btn btn-ghost">กลับหน้าหลัก</button><a class="btn btn-line" href="https://line.me/R/ti/p/%40418xiejk" target="_blank" rel="noopener">สอบถามทาง LINE</a></div>
+    </article>
+  </div>
+
+  <script>
+    // แก้ไขรายชื่อ สี และเงื่อนไขของแต่ละแอพได้ในส่วนนี้
+    const apps = [
+      ['YouTube', 'YT', '#ff0033'], ['Netflix', 'N', '#e50914'], ['Viu', 'V', '#f7bd00'],
+      ['iQIYI', 'iQ', '#00be06'], ['WeTV', 'W', '#35a9ff'], ['Disney+', 'D+', '#153cc3'],
+      ['Prime Video', 'P', '#1399d6'], ['HBO Max', 'H', '#673de6'], ['CH3+', '3+', '#e94d89'],
+      ['BiliBili', 'B', '#00aeec'], ['MONOMAX', 'M', '#ef2b2d'], ['Canva Pro', 'C', '#7d2ae8'],
+      ['Microsoft', 'MS', '#737373'], ['TrueID', 'T', '#e51c23']
+    ].map(([name, short, color]) => ({
+      name, short, color,
+      usage: [
+        'ใช้งานตามแพ็กเกจและระยะเวลาที่สั่งซื้อเท่านั้น',
+        'ตรวจสอบข้อมูลเข้าสู่ระบบและทดลองใช้งานทันทีหลังได้รับสินค้า',
+        'หากพบปัญหา กรุณาแจ้งร้านพร้อมหลักฐานเพื่อให้ตรวจสอบได้รวดเร็ว'
+      ],
+      prohibited: [
+        'ห้ามเปลี่ยนรหัสผ่าน อีเมล หรือข้อมูลบัญชีโดยไม่ได้รับอนุญาต',
+        'ห้ามเพิ่มโปรไฟล์ ผู้ใช้งาน หรืออุปกรณ์เกินจำนวนที่ร้านกำหนด',
+        'ห้ามนำบัญชีหรือข้อมูลที่ได้รับไปจำหน่ายต่อ'
+      ],
+      warranty: [
+        'รับประกันตามระยะเวลาของแพ็กเกจ โดยต้องปฏิบัติตามกฎของร้าน',
+        'ร้านดูแลเฉพาะปัญหาที่เกิดจากตัวสินค้า ไม่ครอบคลุมการใช้งานผิดเงื่อนไข',
+        'กรุณาติดต่อ LINE @418xiejk เมื่อต้องการแจ้งปัญหา'
+      ]
+    }));
+
+    const grid = document.getElementById('grid');
+    const search = document.getElementById('search');
+    const clear = document.getElementById('clear');
+    const count = document.getElementById('count');
+    const empty = document.getElementById('empty');
+    const modal = document.getElementById('modal');
+    let lastFocused = null;
+
+    function render(list) {
+      grid.innerHTML = '';
+      list.forEach(app => {
+        const button = document.createElement('button');
+        button.className = 'app-card';
+        button.innerHTML = `<span class="app-icon" style="background:${app.color}">${app.short}</span><span class="app-copy"><span class="app-name">${app.name}</span><span class="app-hint">ดูเงื่อนไข ›</span></span>`;
+        button.addEventListener('click', () => openModal(app, button));
+        grid.appendChild(button);
+      });
+      count.textContent = `${list.length} แอพ`;
+      empty.style.display = list.length ? 'none' : 'block';
+    }
+
+    function fillList(id, values) {
+      document.getElementById(id).innerHTML = values.map(value => `<li>${value}</li>`).join('');
+    }
+
+    function openModal(app, trigger) {
+      lastFocused = trigger;
+      document.getElementById('modalName').textContent = app.name;
+      const icon = document.getElementById('modalIcon');
+      icon.textContent = app.short;
+      icon.style.background = app.color;
+      fillList('usageRules', app.usage);
+      fillList('prohibitedRules', app.prohibited);
+      fillList('warrantyRules', app.warranty);
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      document.getElementById('close').focus();
+    }
+
+    function closeModal() {
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+      if (lastFocused) lastFocused.focus();
+    }
+
+    search.addEventListener('input', () => {
+      const query = search.value.trim().toLocaleLowerCase('th');
+      render(apps.filter(app => app.name.toLocaleLowerCase('th').includes(query)));
+      clear.style.display = query ? 'block' : 'none';
+    });
+    clear.addEventListener('click', () => { search.value = ''; clear.style.display = 'none'; render(apps); search.focus(); });
+    document.getElementById('close').addEventListener('click', closeModal);
+    document.getElementById('back').addEventListener('click', closeModal);
+    modal.addEventListener('click', event => { if (event.target === modal) closeModal(); });
+    document.addEventListener('keydown', event => { if (event.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
+    render(apps);
+  </script>
+</body>
+</html>
+
