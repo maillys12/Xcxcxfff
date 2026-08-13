@@ -165,13 +165,22 @@
   <script>
     // แก้ไขรายชื่อ สี และเงื่อนไขของแต่ละแอพได้ในส่วนนี้
     const apps = [
-      ['YouTube', 'YT', '#ff0033', 'youtube.com'], ['Netflix', 'N', '#e50914', 'netflix.com'], ['Viu', 'V', '#f7bd00', 'viu.com'],
-      ['iQIYI', 'iQ', '#00be06', 'iq.com'], ['WeTV', 'W', '#35a9ff', 'wetv.vip'], ['Disney+', 'D+', '#153cc3', 'disneyplus.com'],
-      ['Prime Video', 'P', '#1399d6', 'primevideo.com'], ['HBO Max', 'H', '#673de6', 'max.com'], ['CH3+', '3+', '#e94d89', 'ch3plus.com'],
-      ['BiliBili', 'B', '#00aeec', 'bilibili.tv'], ['MONOMAX', 'M', '#ef2b2d', 'monomax.me'], ['Canva Pro', 'C', '#7d2ae8', 'canva.com'],
-      ['Microsoft', 'MS', '#737373', 'microsoft.com'], ['TrueID', 'T', '#e51c23', 'trueid.net']
-    ].map(([name, short, color, domain]) => ({
-      name, short, color, domain,
+      ['YouTube', 'YT', '#ff0033', 'https://upload.wikimedia.org/wikipedia/commons/e/ef/Youtube_logo_%282015%2C_white-on-red%29.svg'],
+      ['Netflix', 'N', '#e50914', 'https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg'],
+      ['Viu', 'V', '#f7bd00', 'https://upload.wikimedia.org/wikipedia/commons/d/df/Viu_logo.svg'],
+      ['iQIYI', 'iQ', '#00be06', 'https://upload.wikimedia.org/wikipedia/commons/c/c8/IQIYI_logo_2021.svg'],
+      ['WeTV', 'W', '#35a9ff', 'https://upload.wikimedia.org/wikipedia/commons/7/73/Tencent_Video_logo_%282022%29.svg'],
+      ['Disney+', 'D+', '#153cc3', 'https://upload.wikimedia.org/wikipedia/commons/3/3e/Disney%2B_logo.svg'],
+      ['Prime Video', 'P', '#1399d6', 'https://upload.wikimedia.org/wikipedia/commons/f/f1/Prime_Video.svg'],
+      ['HBO Max', 'H', '#673de6', 'https://upload.wikimedia.org/wikipedia/commons/c/c4/Max_2023.svg'],
+      ['CH3+', '3+', '#e94d89', ''],
+      ['BiliBili', 'B', '#00aeec', 'https://upload.wikimedia.org/wikipedia/commons/f/fb/Bilibili_Logo.svg'],
+      ['MONOMAX', 'M', '#ef2b2d', ''],
+      ['Canva Pro', 'C', '#7d2ae8', 'https://upload.wikimedia.org/wikipedia/commons/0/08/Canva_icon_2021.svg'],
+      ['Microsoft', 'MS', '#737373', 'https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg'],
+      ['TrueID', 'T', '#e51c23', '']
+    ].map(([name, short, color, logoUrl]) => ({
+      name, short, color, logoUrl,
       usage: [
         'ใช้งานตามแพ็กเกจและระยะเวลาที่สั่งซื้อเท่านั้น',
         'ตรวจสอบข้อมูลเข้าสู่ระบบและทดลองใช้งานทันทีหลังได้รับสินค้า',
@@ -214,13 +223,17 @@
       return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
     }
 
+    function appLogo(app) {
+      return app.logoUrl || logoSvg(app);
+    }
+
     function render(list) {
       grid.innerHTML = '';
       list.forEach(app => {
         const button = document.createElement('button');
         button.className = 'app-card';
-        const logo = logoSvg(app);
-        button.innerHTML = `<span class="app-icon" style="background:${app.color}"><img src="${logo}" alt="โลโก้ ${app.name}" loading="lazy" onerror="this.remove();this.parentElement.textContent='${app.short}'"></span><span class="app-copy"><span class="app-name">${app.name}</span><span class="app-hint">ดูเงื่อนไข ›</span></span>`;
+        const logo = appLogo(app);
+        button.innerHTML = `<span class="app-icon" style="background:${app.color}"><img src="${logo}" alt="โลโก้ ${app.name}" loading="lazy" onerror="this.src='${logoSvg(app)}'"></span><span class="app-copy"><span class="app-name">${app.name}</span><span class="app-hint">ดูเงื่อนไข ›</span></span>`;
         button.addEventListener('click', () => openModal(app, button));
         grid.appendChild(button);
       });
@@ -236,7 +249,7 @@
       lastFocused = trigger;
       document.getElementById('modalName').textContent = app.name;
       const icon = document.getElementById('modalIcon');
-      icon.innerHTML = `<img src="${logoSvg(app)}" alt="โลโก้ ${app.name}" onerror="this.remove();this.parentElement.textContent='${app.short}'">`;
+      icon.innerHTML = `<img src="${appLogo(app)}" alt="โลโก้ ${app.name}" onerror="this.src='${logoSvg(app)}'">`;
       icon.style.background = app.color;
       fillList('usageRules', app.usage);
       fillList('prohibitedRules', app.prohibited);
